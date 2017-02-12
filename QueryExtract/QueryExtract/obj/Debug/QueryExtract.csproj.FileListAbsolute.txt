@@ -1,0 +1,13 @@
+c:\users\user\documents\visual studio 2015\Projects\QueryExtract\QueryExtract\bin\Debug\QueryExtract.exe.config
+c:\users\user\documents\visual studio 2015\Projects\QueryExtract\QueryExtract\bin\Debug\QueryExtract.exe
+c:\users\user\documents\visual studio 2015\Projects\QueryExtract\QueryExtract\bin\Debug\QueryExtract.pdb
+c:\users\user\documents\visual studio 2015\Projects\QueryExtract\QueryExtract\obj\Debug\QueryExtract.csprojResolveAssemblyReference.cache
+c:\users\user\documents\visual studio 2015\Projects\QueryExtract\QueryExtract\obj\Debug\QueryExtract.fmQueryExtract.resources
+c:\users\user\documents\visual studio 2015\Projects\QueryExtract\QueryExtract\obj\Debug\QueryExtract.Properties.Resources.resources
+c:\users\user\documents\visual studio 2015\Projects\QueryExtract\QueryExtract\obj\Debug\QueryExtract.csproj.GenerateResource.Cache
+c:\users\user\documents\visual studio 2015\Projects\QueryExtract\QueryExtract\obj\Debug\QueryExtract.exe
+c:\users\user\documents\visual studio 2015\Projects\QueryExtract\QueryExtract\obj\Debug\QueryExtract.pdb
+C:\Users\USER\Documents\Visual Studio 2015\Projects\QueryExtract\QueryExtract\bin\Debug\Irony.dll
+C:\Users\USER\Documents\Visual Studio 2015\Projects\QueryExtract\QueryExtract\bin\Debug\Sprache.dll
+C:\Users\USER\Documents\Visual Studio 2015\Projects\QueryExtract\QueryExtract\bin\Debug\Irony.pdb
+C:\Users\USER\Documents\Visual Studio 2015\Projects\QueryExtract\QueryExtract\bin\Debug\Irony.xml
