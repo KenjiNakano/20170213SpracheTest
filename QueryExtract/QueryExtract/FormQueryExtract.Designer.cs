@@ -49,6 +49,7 @@
             this.tbInput.Size = new System.Drawing.Size(418, 485);
             this.tbInput.TabIndex = 0;
             this.tbInput.TextChanged += new System.EventHandler(this.tbInput_TextChanged);
+            this.tbInput.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbInput_KeyDown);
             // 
             // tbOutput
             // 
@@ -58,6 +59,7 @@
             this.tbOutput.Size = new System.Drawing.Size(382, 485);
             this.tbOutput.TabIndex = 1;
             this.tbOutput.TextChanged += new System.EventHandler(this.tbOutput_TextChanged);
+            this.tbOutput.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbOutput_KeyDown);
             // 
             // dvIfCondition
             // 
