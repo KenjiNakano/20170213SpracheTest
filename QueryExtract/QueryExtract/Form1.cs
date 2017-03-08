@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Sprache;
 using Irony;
+using System.Text.RegularExpressions;
 
 namespace QueryExtract
 {
@@ -33,19 +34,23 @@ namespace QueryExtract
 
         private string ExtractQuery(string input)
         {
-            _vbParser.Clear();
-            foreach (var line in VbParser.GetVbLines(input))
-            {
-                _vbParser.ParseVbLine(line, this);
-            }
-            return _vbParser.ReturnQueryString();
+            _vbParser.ClearQueryStringVarialbes();
+            var inputAfterTrim = VbParser.GetVbLines(input); //空白の処理
+            var inputAfterComment = VbParser.CommentProcess(inputAfterTrim); //コメントの除去
+            var vbLinesAfterIf = _vbParser.IfProcess(inputAfterComment, this);
+            var vbLinesAfterParams = _vbParser.ParamsProcess(vbLinesAfterIf, this);
+            var vbLinesAfterAppendLine = _vbParser.AppendLineProcess(vbLinesAfterParams);
+            var vbLinesAfterReplaceParams = _vbParser.ReplaceParamsProcess(vbLinesAfterAppendLine);
+
+            var vbLinesFinal = vbLinesAfterReplaceParams;
+            return vbLinesFinal;
         }
 
 
         public void RegistIfParameter(HashSet<String> lst)
         {
             List<string> ifParametersAlreadyRegistered = new List<string>();
-            foreach (DataGridViewRow r in this.dataGridView1.Rows)
+            foreach (DataGridViewRow r in this.dvIfCondition.Rows)
             {
                 ifParametersAlreadyRegistered.Add((string)r.Cells[0].Value);
             }
@@ -54,145 +59,140 @@ namespace QueryExtract
             {
                 if (!ifParametersAlreadyRegistered.Contains(l))
                 {
-                    this.dataGridView1.Rows.Add(l);
+                    this.dvIfCondition.Rows.Add(l);
                 }
             }
         }
 
-        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        public void RegistSqlParam(string sqlParam)
+        {
+            List<string> sqlParametersAlreadyRegistered = new List<string>();
+            foreach (DataGridViewRow r in this.dvSqlParams.Rows)
+            {
+                sqlParametersAlreadyRegistered.Add((string)r.Cells[0].Value);
+            }
+
+            
+            if (!sqlParametersAlreadyRegistered.Contains(sqlParam))
+            {
+                this.dvSqlParams.Rows.Add(sqlParam);
+            }
+        }
+
+        private void dvIfParameters_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
             if (e.ColumnIndex == 1)
             {
                 _vbParser.ClearValidIfConditions();
-                foreach (DataGridViewRow r in dataGridView1.Rows)
+                foreach (DataGridViewRow r in dvIfCondition.Rows)
                 {
                     _vbParser.AddIfParameters((string)r.Cells[0].Value, (string)r.Cells[1].Value);
                 }
                 tbOutput.Text = ExtractQuery(tbInput.Text);
             }
         }
-    }
 
-    class QueryString
-    {
-        string _query = "";
-        bool _inIfBlock = false;
-        string _ifCondition = "";
-
-        public QueryString(string query, bool inIfBlock, string ifCondition)
+        private void dvSqlParams_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-            _query = query;
-            _inIfBlock = inIfBlock;
-            _ifCondition = ifCondition;
-        }
+            if (e.ColumnIndex == 1)
+            {
+                _vbParser.ClearSqlParams();
+                foreach (DataGridViewRow r in dvSqlParams.Rows)
+                {
+                    _vbParser.AddSqlParams((string)r.Cells[0].Value, (string)r.Cells[1].Value);
+                }
+                tbOutput.Text = ExtractQuery(tbInput.Text);
+            }
 
-        public string Query()
-        {
-            return _query;
-        }
-
-        public string IfCondition()
-        {
-            return _ifCondition;
-        }
-
-        public bool InIfBlock()
-        {
-            return _inIfBlock;
         }
     }
 
     class QueryStringVariables
     {
-        private Dictionary<string, List<QueryString>> _queryStringVarialbes = new Dictionary<string, List<QueryString>>();
+        private Dictionary<string, List<string>> _queryStringVarialbes = new Dictionary<string, List<string>>();
 
         public void Add(string varName)
         {
             if (!_queryStringVarialbes.ContainsKey(varName))
             {
-                _queryStringVarialbes.Add(varName, new List<QueryString>());
+                _queryStringVarialbes.Add(varName, new List<string>());
             }
         }
 
-        public void Add(QueryVarialbeAndString appline)
+        public void Add(QueryStringAndVariable appline)
         {
-            List<QueryString> lst;
-            _queryStringVarialbes.TryGetValue(appline.QueryVar(), out lst);
+            List<string> lst;
+            _queryStringVarialbes.TryGetValue(appline.QueryVar, out lst);
 
-            lst.Add(new QueryString(appline.QueryString(), false, ""));
+            lst.Add(appline.QueryString);
         }
 
-        public void Add(QueryVarialbeAndString appline, bool inIfBlock, string ifCondition)
-        {
-            List<QueryString> lst;
-            _queryStringVarialbes.TryGetValue(appline.QueryVar(), out lst);
-
-            lst.Add(new QueryString(appline.QueryString(), inIfBlock, ifCondition));
-        }
-
-        public string ReturnQueryString(HashSet<string> validIfConditions)
+        public string ReturnQueryString()
         {
             string retVal = "";
-            bool startIfBlock = false;
             foreach (var val in _queryStringVarialbes.Values) //StringBuilderの変数ごとのループ
             {
                 foreach (var v in val)
                 {
-                    if (v.InIfBlock())
-                    {
-                        if (startIfBlock == false)
-                        {
-                            retVal += "--" + v.IfCondition() + "\r\n--Start--\r\n";
-                        }
-                        startIfBlock = true;
-                        if (validIfConditions.Contains(v.IfCondition()))
-                        {
-                            retVal += v.Query() + "\r\n";
-                        }
-                    } else
-                    {
-                        if (startIfBlock == true)
-                        {
-                            retVal += "--End--\r\n";
-                        }
-                        startIfBlock = false;
-                        retVal += v.Query() + "\r\n";
-                    }
+                    retVal += v + Environment.NewLine;
                 }
             }
             return retVal;
         }
     }
 
-    public class QueryVarialbeAndString
+    public class QueryStringAndVariable
     {
         string _queryVar = "";
         string _queryString = "";
 
-        public QueryVarialbeAndString(string queryVar, string queryString)
+        public QueryStringAndVariable(string queryVar, string queryString)
         {
             _queryVar = queryVar;
             _queryString = queryString;
         }
 
-        public string QueryVar()
+        public string QueryVar
         {
-            return _queryVar;
+            get { return this._queryVar; }
         }
 
-        public string QueryString()
+        public string QueryString
         {
-            return _queryString;
+            get { return this._queryString; }
         }
     }
+
+    public class IfConditionAndVbLine
+    {
+        List<string> _ifConditions = new List<string>();
+        string _vbLine = "";
+
+        public IfConditionAndVbLine(List<string> ifConditions, string vbLine)
+        {
+            _ifConditions = ifConditions;
+            _vbLine = vbLine;
+        }
+
+        public List<string> IfConditions
+        {
+            get { return this._ifConditions; }
+        }
+
+        public string QueryString
+        {
+            get { return this._vbLine; }
+        }
+    }
+
 
     class VbParser
     {
         public static Parser<string> _strParser
-            = from str in Parse.LetterOrDigit.Or(Parse.Chars(new char[] { '(', ')', '*', '.', '_', '=', '>', '<', '\'', '@' })).AtLeastOnce().Token()
+            = from str in Parse.LetterOrDigit.Or(Parse.Chars(new char[] { '(', ')', '*', '.', '_', '=', '>', '<', '\'', '@', '\'' })).AtLeastOnce().Token()
               select new string(str.ToArray());
 
-        public static Parser<string> _dimParser
+        public static Parser<string> _dimStringBuilderParser
             = from dim in Parse.String("Dim").Text().Token()
               from v in _strParser
               from rest in Parse.String("As New StringBuilder").Text().Token()
@@ -200,92 +200,176 @@ namespace QueryExtract
 
 
         private QueryStringVariables _queryStringVarialbes = new QueryStringVariables();
-        private bool _isInIfBlock = false;
         private HashSet<string> _allIfConditions = new HashSet<string>();
+        private Stack<string> _currentIfConditions = new Stack<string>();
         private HashSet<string> _validIfConditions = new HashSet<string>();
+        private Dictionary<string, string> _sqlParams = new Dictionary<string, string>();
 
-        public static List<string> GetVbLines(string input)
-        {
-            List<string> vbLines = new List<string>();
-            foreach (var line in input.Split("\r\n".ToArray()))
-            {
-                if (line != "")
-                {
-                    vbLines.Add(line);
-                }
-            }
-            return vbLines;
-        }
-
-        public void Clear()
+        public void ClearQueryStringVarialbes()
         {
             _queryStringVarialbes = new QueryStringVariables();
         }
 
-        public string ReturnQueryString()
+        public static string GetVbLines(string input)
         {
-            return _queryStringVarialbes.ReturnQueryString(_validIfConditions);
+            //行前後の空白を削除
+            var inputAfterTrim = "";
+            foreach (var line in input.Split(Environment.NewLine.ToArray()))
+            {
+                if (line != "")
+                {
+                    inputAfterTrim += line.Trim() + Environment.NewLine;
+                }
+            }
+            return inputAfterTrim;
         }
+
+        public static string CommentProcess(string inputAfterTrim)
+        {
+            //行前後の空白を削除
+            var inputAfterCommentProcess = "";
+            foreach (var line in inputAfterTrim.Split(Environment.NewLine.ToArray()))
+            {
+                if (line != "")
+                {
+                    var l = "";
+                    var inLineComment = false;
+                    var inDoubleQuote = false;
+                    foreach (var c in line)
+                    {
+                        if (c == '"')
+                        {
+                            inDoubleQuote = !inDoubleQuote;
+                        }
+                        if (!inDoubleQuote && c == '\'')
+                        {
+                            inLineComment = true;
+                        }
+
+                        if (!inLineComment)
+                        {
+                            l += c;
+                        }
+                    }
+                    inputAfterCommentProcess += l + Environment.NewLine;
+                }
+            }
+
+            return inputAfterCommentProcess;
+        }
+
+
+
 
         private void RegistIfParameter(string condition, fmQueryExtract form)
         {
             _allIfConditions.Add(condition);
-            form.RegistIfParameter(_allIfConditions);
+            _currentIfConditions.Push(condition);
         }
 
-        public void ParseVbLine(string vbline, fmQueryExtract form)
+        private void RemoveIfParameter()
         {
-            if (vbline.Contains("If") && !vbline.Contains("END If"))
-            {
-                _isInIfBlock = true;
-                var ifStatementParser
-                    = from _a in Parse.String("If").Token()
-                      from condition in Parse.LetterOrDigit.AtLeastOnce().Token()
-                      from _b in Parse.String("Then").Token()
-                      select new string(condition.ToArray());
+            _currentIfConditions.Pop();
+        }
 
-                var ifParameter = ifStatementParser.Parse(vbline);
-                RegistIfParameter(ifParameter, form);
-            }
 
-            if (vbline.Contains("END If"))
+        public string IfProcess(string inputAfterComment, fmQueryExtract form)
+        {
+            List<IfConditionAndVbLine> x = new List<IfConditionAndVbLine>();
+            foreach (var line in inputAfterComment.Split(Environment.NewLine.ToArray()))
             {
-                _isInIfBlock = false;
-            }
-
-            if (vbline.Contains("Dim"))
-            {
-                var result = _dimParser.Parse(vbline);
-                _queryStringVarialbes.Add(result);
-            } else if (vbline.Contains("AppendLine"))
-            {
-                var p = CreateAppendLineParser();
-                var appLine = p.Parse(vbline);
-                if (_isInIfBlock)
+                if (line != "")
                 {
-                    _queryStringVarialbes.Add(appLine, _isInIfBlock, _allIfConditions.Last());
-                } else
-                {
-                    _queryStringVarialbes.Add(appLine);
+                    Regex ifRegex = new System.Text.RegularExpressions.Regex("^If");
+                    Regex endIfRegex = new System.Text.RegularExpressions.Regex("^END If");
+
+                    if (ifRegex.IsMatch(line))
+                    {
+                        var ifStatementParser
+                            = from _a in Parse.String("If").Token()
+                              from condition in Parse.LetterOrDigit.AtLeastOnce().Token()
+                              from _b in Parse.String("Then").Token()
+                              select new string(condition.ToArray());
+
+                        var ifParameter = ifStatementParser.Parse(line);
+                        RegistIfParameter(ifParameter, form);
+                    }
+                    else if (endIfRegex.IsMatch(line))
+                    {
+                        RemoveIfParameter();
+                    }
+                    else
+                    {
+                        x.Add(new IfConditionAndVbLine(new List<string>(_currentIfConditions.ToArray()), line));
+                    }
                 }
             }
+
+            form.RegistIfParameter(_allIfConditions);
+
+            var retval = "";
+
+            foreach (var ifAndVbline in x)
+            {
+                var isAdd = true;
+                foreach (var ifCondition in ifAndVbline.IfConditions)
+                {
+                    if (!_validIfConditions.Contains(ifCondition))
+                    {
+                        isAdd = false;
+                    }
+                }
+                if (isAdd)
+                {
+                    retval += ifAndVbline.QueryString + Environment.NewLine;
+                }
+            }
+
+            return retval;
         }
 
-        public Parser<QueryVarialbeAndString> CreateAppendLineParser()
+        public string AppendLineProcess(string inputAfterComment)
         {
-            Parser<QueryVarialbeAndString> appendLineParser
+            foreach (var line in inputAfterComment.Split(Environment.NewLine.ToArray()))
+            {
+                if (line != "")
+                {
+                    Regex dimRegex = new System.Text.RegularExpressions.Regex("^Dim");
+                    Regex stringBuilderRegex = new System.Text.RegularExpressions.Regex("StringBuilder$");
+                    Regex sqlParameterRegex = new System.Text.RegularExpressions.Regex("SqlParameter$");
+                    Regex apppendLineRegex = new System.Text.RegularExpressions.Regex("^(.+)AppendLine");
+
+                    if (dimRegex.IsMatch(line) && stringBuilderRegex.IsMatch(line))
+                    {
+                        var result = _dimStringBuilderParser.Parse(line);
+                        _queryStringVarialbes.Add(result);
+                    }
+                    else if (apppendLineRegex.IsMatch(line))
+                    {
+                        var p = CreateAppendLineParser();
+                        var appLine = p.Parse(line);
+                        _queryStringVarialbes.Add(appLine);
+                    }
+                }
+            }
+            return _queryStringVarialbes.ReturnQueryString();
+        }
+
+        public Parser<QueryStringAndVariable> CreateAppendLineParser()
+        {
+            Parser<QueryStringAndVariable> appendLineParser
                     = from queryVar in Parse.LetterOrDigit.AtLeastOnce().Text().Token()
                       from _a in Parse.String(".AppendLine(\"").Text()
                       from queryString2 in _strParser.Many()
                       from _b in Parse.String("\")").Text().Token()
-                      select new QueryVarialbeAndString(queryVar, string.Join(" ", queryString2.ToArray()));
+                      select new QueryStringAndVariable(queryVar, string.Join(" ", queryString2.ToArray()));
 
-            Parser<QueryVarialbeAndString> appendLineParser2
+            Parser<QueryStringAndVariable> appendLineParser2
                     = from queryVar in Parse.LetterOrDigit.AtLeastOnce().Text().Token()
                       from _a in Parse.String(".AppendLine(").Text()
                       from queryString in CreateFormatFunctionParser()
                       from _b in Parse.String(")").Text().Token()
-                      select new QueryVarialbeAndString(queryVar, queryString);
+                      select new QueryStringAndVariable(queryVar, queryString);
 
             return appendLineParser.Or(appendLineParser2);
         }
@@ -327,10 +411,66 @@ namespace QueryExtract
             }
         }
 
+        public void AddSqlParams(string sqlParam, string value)
+        {
+            if (value != null)
+            {
+                _sqlParams.Add(sqlParam, value);
+            }
+        }
+
         public void ClearValidIfConditions()
         {
             _validIfConditions.Clear();
         }
+
+        public void ClearSqlParams()
+        {
+            _sqlParams.Clear();
+        }
+
+        public string ParamsProcess(string input, fmQueryExtract form)
+        {
+            //Dim pramItemID As New SqlParameter("@ItemID", SqlDbType.VarChar, 30)
+            Parser<string> dimSqlParameterParser
+                = from dim in Parse.String("Dim").Text().Token()
+                  from x in Parse.LetterOrDigit.Many().Token()
+                  from rest in Parse.String("As New SqlParameter(\"").Text().Token()
+                  from at in Parse.Char('@')
+                  from param in Parse.LetterOrDigit.AtLeastOnce().Text().Token()
+                  from rest2 in Parse.Char('"')
+                  from rest3 in Parse.AnyChar.Many()
+                  select at + param;
+
+            foreach (var line in input.Split(Environment.NewLine.ToArray()))
+            {
+                if (line != "")
+                {
+                    Regex dimRegex = new System.Text.RegularExpressions.Regex("^Dim");
+                    Regex sqlParameterRegex = new System.Text.RegularExpressions.Regex("SqlParameter");
+
+                    if (dimRegex.IsMatch(line) && sqlParameterRegex.IsMatch(line))
+                    {
+                        var result = dimSqlParameterParser.Parse(line);
+                        form.RegistSqlParam(result);
+                    }
+                }
+            }
+
+            return input;
+        }
+
+        public string ReplaceParamsProcess(string input)
+        {
+            var retval = input;
+            foreach (var sqlParam in _sqlParams)
+            {
+                retval = retval.Replace(sqlParam.Key, sqlParam.Value);
+            }
+
+            return retval;
+        }
+
     }
 }
     /*

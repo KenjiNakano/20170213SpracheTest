@@ -30,10 +30,14 @@
         {
             this.tbInput = new System.Windows.Forms.TextBox();
             this.tbOutput = new System.Windows.Forms.TextBox();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.IfConditionName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dvIfCondition = new System.Windows.Forms.DataGridView();
+            this.IfCondition = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.TrueOrFalse = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            this.dvSqlParams = new System.Windows.Forms.DataGridView();
+            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            ((System.ComponentModel.ISupportInitialize)(this.dvIfCondition)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dvSqlParams)).BeginInit();
             this.SuspendLayout();
             // 
             // tbInput
@@ -55,41 +59,66 @@
             this.tbOutput.TabIndex = 1;
             this.tbOutput.TextChanged += new System.EventHandler(this.tbOutput_TextChanged);
             // 
-            // dataGridView1
+            // dvIfCondition
             // 
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.IfConditionName,
+            this.dvIfCondition.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dvIfCondition.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.IfCondition,
             this.TrueOrFalse});
-            this.dataGridView1.Location = new System.Drawing.Point(835, 12);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.RowTemplate.Height = 21;
-            this.dataGridView1.Size = new System.Drawing.Size(253, 150);
-            this.dataGridView1.TabIndex = 2;
-            this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
-            this.dataGridView1.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
+            this.dvIfCondition.Location = new System.Drawing.Point(835, 12);
+            this.dvIfCondition.Name = "dvIfCondition";
+            this.dvIfCondition.RowTemplate.Height = 21;
+            this.dvIfCondition.Size = new System.Drawing.Size(253, 150);
+            this.dvIfCondition.TabIndex = 2;
+            this.dvIfCondition.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dvIfParameters_CellEndEdit);
+            this.dvIfCondition.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dvIfParameters_CellEndEdit);
             // 
-            // IfConditionName
+            // IfCondition
             // 
-            this.IfConditionName.HeaderText = "IfConditionNameColumn";
-            this.IfConditionName.Name = "IfConditionName";
+            this.IfCondition.HeaderText = "IfCondition";
+            this.IfCondition.Name = "IfCondition";
             // 
             // TrueOrFalse
             // 
             this.TrueOrFalse.HeaderText = "TrueOrFalse";
             this.TrueOrFalse.Name = "TrueOrFalse";
             // 
+            // dvSqlParams
+            // 
+            this.dvSqlParams.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dvSqlParams.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.dataGridViewTextBoxColumn1,
+            this.dataGridViewTextBoxColumn2});
+            this.dvSqlParams.Location = new System.Drawing.Point(835, 168);
+            this.dvSqlParams.Name = "dvSqlParams";
+            this.dvSqlParams.RowTemplate.Height = 21;
+            this.dvSqlParams.Size = new System.Drawing.Size(253, 150);
+            this.dvSqlParams.TabIndex = 3;
+            this.dvSqlParams.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dvSqlParams_CellEndEdit);
+            // 
+            // dataGridViewTextBoxColumn1
+            // 
+            this.dataGridViewTextBoxColumn1.HeaderText = "SqlParameter";
+            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            // 
+            // dataGridViewTextBoxColumn2
+            // 
+            this.dataGridViewTextBoxColumn2.HeaderText = "Value";
+            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            // 
             // fmQueryExtract
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1118, 509);
-            this.Controls.Add(this.dataGridView1);
+            this.Controls.Add(this.dvSqlParams);
+            this.Controls.Add(this.dvIfCondition);
             this.Controls.Add(this.tbOutput);
             this.Controls.Add(this.tbInput);
             this.Name = "fmQueryExtract";
             this.Text = "QueryExtract";
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dvIfCondition)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dvSqlParams)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -99,9 +128,12 @@
 
         private System.Windows.Forms.TextBox tbInput;
         private System.Windows.Forms.TextBox tbOutput;
-        private System.Windows.Forms.DataGridView dataGridView1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn IfConditionName;
+        private System.Windows.Forms.DataGridView dvIfCondition;
+        private System.Windows.Forms.DataGridView dvSqlParams;
+        private System.Windows.Forms.DataGridViewTextBoxColumn IfCondition;
         private System.Windows.Forms.DataGridViewTextBoxColumn TrueOrFalse;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
     }
 }
 

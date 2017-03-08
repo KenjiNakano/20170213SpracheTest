@@ -14,3 +14,13 @@ C:\Users\USER\Documents\Visual Studio 2015\Projects\QueryExtract\QueryExtract\bi
 C:\Users\USER\Documents\GitHub\20170213SpracheTest\QueryExtract\QueryExtract\bin\Debug\QueryExtract.exe.config
 C:\Users\USER\Documents\GitHub\20170213SpracheTest\QueryExtract\QueryExtract\obj\Debug\QueryExtract.exe
 C:\Users\USER\Documents\GitHub\20170213SpracheTest\QueryExtract\QueryExtract\obj\Debug\QueryExtract.pdb
+C:\Users\USER\Documents\GitHub\20170213SpracheTest\QueryExtract\QueryExtract\obj\Debug\QueryExtract.csprojResolveAssemblyReference.cache
+C:\Users\USER\Documents\GitHub\20170213SpracheTest\QueryExtract\QueryExtract\obj\Debug\QueryExtract.fmQueryExtract.resources
+C:\Users\USER\Documents\GitHub\20170213SpracheTest\QueryExtract\QueryExtract\obj\Debug\QueryExtract.Properties.Resources.resources
+C:\Users\USER\Documents\GitHub\20170213SpracheTest\QueryExtract\QueryExtract\obj\Debug\QueryExtract.csproj.GenerateResource.Cache
+C:\Users\USER\Documents\GitHub\20170213SpracheTest\QueryExtract\QueryExtract\bin\Debug\QueryExtract.exe
+C:\Users\USER\Documents\GitHub\20170213SpracheTest\QueryExtract\QueryExtract\bin\Debug\QueryExtract.pdb
+C:\Users\USER\Documents\GitHub\20170213SpracheTest\QueryExtract\QueryExtract\bin\Debug\Irony.dll
+C:\Users\USER\Documents\GitHub\20170213SpracheTest\QueryExtract\QueryExtract\bin\Debug\Sprache.dll
+C:\Users\USER\Documents\GitHub\20170213SpracheTest\QueryExtract\QueryExtract\bin\Debug\Irony.pdb
+C:\Users\USER\Documents\GitHub\20170213SpracheTest\QueryExtract\QueryExtract\bin\Debug\Irony.xml
